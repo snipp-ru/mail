@@ -8,56 +8,56 @@
 class Mail
 {
 	/**
-     * От кого.
+	 * От кого.
 	 * 
 	 * @var string
 	 */
 	public $from = '';
 	
 	/**
-     * Кому.
+	 * Кому.
 	 * 
 	 * @var array
 	 */
 	public $to = array();
 
 	/**
-     * Тема.
+	 * Тема.
 	 * 
 	 * @var string
 	 */
 	public $subject = '';
 	
 	/**
-     * Текст.
+	 * Текст.
 	 * 
 	 * @var string
 	 */
 	public $body = '';
 
 	/**
-     * Массив файлов.
+	 * Массив файлов.
 	 * 
 	 * @var array
 	 */
 	public $files = array();
 
 	/**
-     * Делать дамп письма.
+	 * Делать дамп письма.
 	 * 
 	 * @var bool
 	 */
 	public $dump = false;
 	
 	/**
-     * Директория куда сохранять дампы писем.
+	 * Директория куда сохранять дампы писем.
 	 * 
 	 * @var string
 	 */
 	public $dump_path = '';
 
 	/**
-     * Конструктор.
+	 * Конструктор.
 	 * 
 	 * @return void
 	 */
@@ -85,7 +85,7 @@ class Mail
 
 		$info   = pathinfo($filename);
 		$name   = $dir . '/' . $info['filename']; 
-		$ext    = (empty($info['extension'])) ? '' : '.' . $info['extension'];
+		$ext	= (empty($info['extension'])) ? '' : '.' . $info['extension'];
 		$prefix = '';
 
 		if (is_file($name . $ext)) {
@@ -100,7 +100,7 @@ class Mail
 	}	
 
 	/**
-     * От кого.
+	 * От кого.
 	 * 
 	 * @param string $email
 	 * @param string $name
@@ -112,7 +112,7 @@ class Mail
 	}
 
 	/**
-     * Кому.
+	 * Кому.
 	 * 
 	 * @param string $email
 	 * @param string $name
@@ -134,7 +134,7 @@ class Mail
 	}
 
 	/**
-     * Отправка
+	 * Отправка
 	 * 
 	 * @return bool
 	 */
@@ -194,14 +194,14 @@ class Mail
 					$name = basename($row);
 					$fp = fopen($row, 'rb');  
 					$file = fread($fp, filesize($row));   
-					fclose($fp); 			
+					fclose($fp);			 
 
 					$headers[] =  "\r\n--" . $boundary;   
 					$headers[] = 'Content-Type: application/octet-stream; name="' . $name . '"';   
 					$headers[] = 'Content-Transfer-Encoding: base64';   
 					$headers[] = 'Content-Disposition: attachment; filename="' . $name . '"';   
 					$headers[] = "\r\n"; 
-					$headers[] = chunk_split(base64_encode($file)); 					
+					$headers[] = chunk_split(base64_encode($file));					 
 				}
 			}
 			
