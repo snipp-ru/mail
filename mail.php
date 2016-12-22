@@ -1,80 +1,73 @@
 <?php
 /**
-* PHP класс для отправки e-mail.
+* PHP класс для отправки E-mail.
 * 
-* @author http://snipp.ru/
-* @version 1.0
+* @author Snipp.ru
+* @website http://snipp.ru/view/80
+* @version 2.0
 */
 class Mail
 {
 	/**
 	 * От кого.
-	 * 
-	 * @var string
 	 */
-	public $from = '';
-	
-	/**
-	 * Кому.
-	 * 
-	 * @var array
-	 */
-	public $to = array();
+	public $fromEmail = '';
+	public $fromName = '';
 
 	/**
+	 * Кому.
+	 */
+	public $toEmail = '';
+	public $toName = '';
+	
+	/**
 	 * Тема.
-	 * 
-	 * @var string
 	 */
 	public $subject = '';
 	
 	/**
 	 * Текст.
-	 * 
-	 * @var string
 	 */
 	public $body = '';
 
 	/**
-	 * Массив файлов.
-	 * 
-	 * @var array
+	 * Массив заголовков файлов.
 	 */
-	public $files = array();
+	private $_files = array();
 
 	/**
-	 * Делать дамп письма.
-	 * 
-	 * @var bool
+	 * Управление дампированием.
 	 */
 	public $dump = false;
-	
-	/**
-	 * Директория куда сохранять дампы писем.
-	 * 
-	 * @var string
-	 */
-	public $dump_path = '';
 
 	/**
-	 * Конструктор.
-	 * 
-	 * @return void
+	 * Директория куда сохранять письма.
 	 */
-	public function __construct()
-	{
-		if (empty($this->dump_path)) {
-			$this->dump_path = dirname(__FILE__) . '/sendmail';
-		}
-	}
+	public $dumpPath = '';
+	
+	/**
+	 * CSS стили для тегов письма.
+	 */
+	private $_styles = array(
+		'body'  => 'margin: 0 0 0 0; padding: 10px 10px 10px 10px; background: #ffffff; color: #000000; font-size: 14px; font-family: Arial, Helvetica, sans-serif; line-height: 18px;', 
+		'a'     => 'color: #003399; text-decoration: underline; font-size: 14px; font-family: Arial, Helvetica, sans-serif; line-height: 18px;', 
+		'p'     => 'margin: 0 0 20px 0; padding: 0 0 0 0; color: #000000; font-size: 14px; font-family: Arial, Helvetica, sans-serif; line-height: 18px;', 
+		'ul'    => 'margin: 0 0 20px 20px; padding: 0 0 0 0; color: #000000; font-size: 14px; font-family: Arial, Helvetica, sans-serif; line-height: 18px;', 
+		'ol'    => 'margin: 0 0 20px 20px; padding: 0 0 0 0; color: #000000; font-size: 14px; font-family: Arial, Helvetica, sans-serif; line-height: 18px;', 
+		'table' => 'margin: 0 0 20px 0; border: 1px solid #dddddd; border-collapse: collapse;',
+		'th'    => 'padding: 10px; border: 1px solid #dddddd; vertical-align: middle; background-color: #eeeeee; color: #000000; font-size: 14px; font-family: Arial, Helvetica, sans-serif; line-height: 18px;',
+		'td'    => 'padding: 10px; border: 1px solid #dddddd; vertical-align: middle; background-color: #ffffff; color: #000000; font-size: 14px; font-family: Arial, Helvetica, sans-serif; line-height: 18px;', 
+		'h1'    => 'margin: 0 0 20px 0; padding: 0 0 0 0; color: #000000; font-size: 22px; font-family: Arial, Helvetica, sans-serif; line-height: 26px; font-weight: bold;', 
+		'h2'    => 'margin: 0 0 20px 0; padding: 0 0 0 0; color: #000000; font-size: 20px; font-family: Arial, Helvetica, sans-serif; line-height: 24px; font-weight: bold;', 
+		'h3'    => 'margin: 0 0 20px 0; padding: 0 0 0 0; color: #000000; font-size: 18px; font-family: Arial, Helvetica, sans-serif; line-height: 22px; font-weight: bold;', 
+		'h4'    => 'margin: 0 0 20px 0; padding: 0 0 0 0; color: #000000; font-size: 16px; font-family: Arial, Helvetica, sans-serif; line-height: 20px; font-weight: bold;', 
+		'hr'    => 'height: 1px; border: none; color: #dddddd; background: #dddddd; margin: 0 0 20px 0;'
+	); 
 
 	/**
 	 * Проверка существования файла.
-	 * Если дериктория не существует - пытается её создать.
+	 * Если директория не существует - пытается её создать.
 	 * Если файл существует - к концу файла приписывает префикс.
-	 * 
-	 * @param string $filename
-	 * @return string
 	 */
 	private function safeFile($filename)
 	{
@@ -85,7 +78,7 @@ class Mail
 
 		$info   = pathinfo($filename);
 		$name   = $dir . '/' . $info['filename']; 
-		$ext	= (empty($info['extension'])) ? '' : '.' . $info['extension'];
+		$ext    = (empty($info['extension'])) ? '' : '.' . $info['extension'];
 		$prefix = '';
 
 		if (is_file($name . $ext)) {
@@ -97,136 +90,134 @@ class Mail
 		}
 
 		return $name . $prefix . $ext;
-	}	
+	}
 
 	/**
 	 * От кого.
-	 * 
-	 * @param string $email
-	 * @param string $name
-	 * @return void
 	 */
 	public function from($email, $name = null)
 	{
-		$this->from = (empty($name)) ? $email : '=?UTF-8?B?' . base64_encode($name) . '?= <' . $email . '>';
+		$this->fromEmail = $email;
+		$this->fromName = $name;
 	}
 
 	/**
 	 * Кому.
-	 * 
-	 * @param string $email
-	 * @param string $name
-	 * @return void
 	 */
 	public function to($email, $name = null)
 	{
-		$this->to = array();
-
-		if (!empty($email)) {
-			$emails = explode(',', $email);
-			foreach ($emails as $row) {
-				$row = trim($row);
-				if (!empty($row)) {
-					$this->to[] = (empty($name)) ? $row : '=?UTF-8?B?' . base64_encode($name) . '?= <' . $row . '>';
-				}
-			}
-		}
+		$this->toEmail = $email;
+		$this->toName = $name;
 	}
 
 	/**
-	 * Отправка
-	 * 
-	 * @return bool
+	 * Добавление файла к письму.
+	 */
+	public function addFile($filename)
+	{
+		if (is_file($filename)) {
+			$name = basename($filename);
+			$fp   = fopen($filename, 'rb');  
+			$file = fread($fp, filesize($filename));   
+			fclose($fp);
+
+			$this->_files[] = array( 
+				'Content-Type: application/octet-stream; name="' . $name . '"',   
+				'Content-Transfer-Encoding: base64',  
+				'Content-Disposition: attachment; filename="' . $name . '"',   
+				'',
+				chunk_split(base64_encode($file)),
+			);
+		}
+	}
+	
+	/**
+	 * Отправка.
 	 */
 	public function send()
 	{
-		if (empty($this->to)) {
+		if (empty($this->toEmail)) {
 			return false;
 		}
 
-		// Тема письма.
-		$subject = (empty($this->subject)) ? 'No subject' : $this->subject;		
+		// От кого.
+		$from = (empty($this->fromName)) ? $this->fromEmail : '=?UTF-8?B?' . base64_encode($this->fromName) . '?= <' . $this->fromEmail . '>';
 
-		// Тело письма.
+		// Кому.
+		$array_to = array();
+		foreach (explode(',', $this->toEmail) as $row) {
+			$row = trim($row);
+			if (!empty($row)) {
+				$array_to[] = (empty($this->toName)) ? $row : '=?UTF-8?B?' . base64_encode($this->toName) . '?= <' . $row . '>';
+			}
+		}
+
+		// Тема письма.
+		$subject = (empty($this->subject)) ? 'No subject' : $this->subject;
+
+		// Текст письма.
 		$body = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
 			<head>
 				<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-				<style type="text/css">
-					body { margin: 0 0 0 0; padding: 10px 10px 10px 10px; background: #ffffff; color: #000000; font-size: 14px; font-family: Tahoma, Arial, sans-serif; line-height: 1.4em; }		
-					a { color: #003399; text-decoration: underline; font-size: 14px; font-family: Tahoma, Arial, sans-serif; line-height: 20px; }
-					p { margin: 0 0 5px 0; padding: 0 0 0 0; color: #000000; font-size: 14px; font-family: Tahoma, Arial, sans-serif; line-height: 18px; }
-					td { padding: 5px; }
-					th { padding: 5px; }
-					h1 { margin: 0 0 8px 0; padding: 0 0 0 0; color: #000000; font-size: 20px; font-family: Tahoma, Arial, sans-serif; line-height: 20px; font-weight: bold; }
-					h2 { margin: 0 0 8px 0; padding: 0 0 0 0; color: #000000; font-size: 18px; font-family: Tahoma, Arial, sans-serif; line-height: 20px; font-weight: bold; }
-					h3 { margin: 0 0 8px 0; padding: 0 0 0 0; color: #000000; font-size: 16px; font-family: Tahoma, Arial, sans-serif; line-height: 20px; font-weight: bold; }
-					h4 { margin: 0 0 8px 0; padding: 0 0 0 0; color: #000000; font-size: 14px; font-family: Tahoma, Arial, sans-serif; line-height: 20px; font-weight: bold; }
-				</style>
 			</head>
 			<body>
 				' . $this->body . '
 			</body>
 		</html>';
 
-		if (empty($this->files)) {
-			$headers = array(
-				'Content-Type: text/html; charset=UTF-8',
-				'Content-Transfer-Encoding: BASE64',
-				'MIME-Version: 1.0',
-				'From: ' . $this->from,
-				'Date: ' . date('r')
-			);
-		} else {
-			$boundary = '--' . md5(uniqid(time()));
-			$headers = array(
-				'Content-Type: multipart/mixed; boundary="' . $boundary . '"',
-				'From: ' . $this->from,
-				'--' . $boundary,
-				'Content-Type: text/html; charset=UTF-8',
-				'Content-Transfer-Encoding: base64',
-				"\r\n",
-				chunk_split(base64_encode($this->body)),
-			);
-
-			foreach ($this->files as $row) {
-				if (is_file($row)) {
-					$name = basename($row);
-					$fp = fopen($row, 'rb');  
-					$file = fread($fp, filesize($row));   
-					fclose($fp);			 
-
-					$headers[] =  "\r\n--" . $boundary;   
-					$headers[] = 'Content-Type: application/octet-stream; name="' . $name . '"';   
-					$headers[] = 'Content-Transfer-Encoding: base64';   
-					$headers[] = 'Content-Disposition: attachment; filename="' . $name . '"';   
-					$headers[] = "\r\n"; 
-					$headers[] = chunk_split(base64_encode($file));					 
-				}
-			}
-			
-			$headers[] = "\r\n--" . $boundary . '--';  
+		// Добавление стилей к тегам.
+		foreach($this->_styles as $tag => $css) {
+			$body = preg_replace('/<' . $tag . '(.*?)style=\"(.*?)\"(.*?)>/i', '<' . $tag . '$1style="$2 ' . $css . '"$3>', $body);
+			$body = str_ireplace('<' . $tag . '>', '<' . $tag . ' style="' . $css . '">', $body);
 		}
 
-		foreach ($this->to as $to) {
+		$boundary = md5(uniqid(time()));
+
+		// Заголовок письма.
+		$headers = array(
+			'Content-Type: multipart/mixed; boundary="' . $boundary . '"',
+			'Content-Transfer-Encoding: 7bit',
+			'MIME-Version: 1.0',
+			'From: ' . $from,
+			'Date: ' . date('r')
+		);
+		
+		// Тело письма.
+		$message = array(
+			'--' . $boundary,
+			'Content-Type: text/html; charset=UTF-8',
+			'Content-Transfer-Encoding: base64',
+			'',
+			chunk_split(base64_encode($body))
+		);
+
+		if (!empty($this->_files)) {
+			foreach ($this->_files as $row) {
+				$message = array_merge($message, array('', '--' . $boundary), $row);
+			}
+		}
+
+		$message[] = '';
+		$message[] = '--' . $boundary . '--';
+
+		$res = array();
+
+		foreach ($array_to as $to) {
 			// Дамп письма в файл.
 			if ($this->dump == true) {
-				$headers_dump = array(
-					'To: ' . $to,
-					'Subject: ' . $subject
-				);
+				if (empty($this->dumpPath)) {
+					$this->dumpPath = dirname(__FILE__) . '/sendmail';
+				}
 
-				$headers_dump = array_merge($headers_dump, $headers);
-				$headers_dump[] = '';
-				$headers_dump[] = base64_encode($this->body);
-
-				$file = $this->safeFile(rtrim($this->dump_path, '/') . '/' . date('Y-m-d_H-i-s') . '.eml');
-				file_put_contents($file, implode("\r\n", $headers_dump));
+				$dump = array_merge($headers, array('To: ' . $to, 'Subject: ' . $subject, ''), $message);
+				$file = $this->safeFile($this->dumpPath . '/' . date('Y-m-d_H-i-s') . '.eml');
+				file_put_contents($file, implode("\r\n", $dump));
 			}
 
-			mb_send_mail($to, $subject, $this->body, implode("\r\n", $headers));	
+			$res[] = mb_send_mail($to, $subject, implode("\r\n", $message), implode("\r\n", $headers));
 		}
 
-		return true;
+		return $res;
 	}
 }
