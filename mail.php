@@ -4,7 +4,7 @@
 * 
 * @author Snipp.ru
 * @website http://snipp.ru/view/80
-* @version 2.0
+* @version 2.1
 */
 class Mail
 {
@@ -132,6 +132,35 @@ class Mail
 	}
 	
 	/**
+	 * Добавление к тегам стили.
+	 */
+	public function addHtmlStyle($html)
+	{
+		foreach ($this->_styles as $tag => $style) {
+			preg_match_all('/<' . $tag . '(.*?)>/i', $html, $matchs, PREG_SET_ORDER); 
+			foreach ($matchs as $match) {
+				preg_match_all('/[ ]?(.*?)=[\"|\'](.*?)[\"|\'][ ]?/', $match[1], $chanks);
+				$attrs = array_combine($chanks[1], $chanks[2]);
+
+				if (empty($attrs['style'])) {
+					$attrs['style'] = $style;
+				} else {
+					$attrs['style'] = rtrim($attrs['style'], '; ') . '; ' . $style;
+				}
+
+				$compile = array();
+				foreach ($attrs as $name => $value) {
+					$compile[] = $name . '="' . $value . '"';
+				}
+
+				$html = str_replace($match[0], '<' . $tag . ' ' . implode(' ', $compile) . '>', $html);
+			}
+		}
+
+		return $html;
+	}
+	
+	/**
 	 * Отправка.
 	 */
 	public function send()
@@ -167,11 +196,8 @@ class Mail
 		</html>';
 
 		// Добавление стилей к тегам.
-		foreach($this->_styles as $tag => $css) {
-			$body = preg_replace('/<' . $tag . '(.*?)style=\"(.*?)\"(.*?)>/i', '<' . $tag . '$1style="$2 ' . $css . '"$3>', $body);
-			$body = str_ireplace('<' . $tag . '>', '<' . $tag . ' style="' . $css . '">', $body);
-		}
-
+		$body = $this->addHtmlStyle($body);
+	
 		$boundary = md5(uniqid(time()));
 
 		// Заголовок письма.
